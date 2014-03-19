@@ -28,4 +28,4 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #################################################################################
 
-__VERSION__ = "0.8.5"
+from .chemistry import *

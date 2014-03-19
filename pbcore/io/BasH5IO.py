@@ -41,6 +41,7 @@ from itertools import groupby
 from collections import OrderedDict
 
 from pbcore.io.FofnIO import readFofn
+from pbcore.chemistry import basH5Chemistry
 from ._utils import arrayFromDataset, CommonEqualityMixin
 
 
@@ -467,6 +468,32 @@ class BaxH5Reader(object):
                                      t=type(movieNameString)))
         return movieNameString
 
+    @property
+    def chemistryBarcodeTriple(self):
+        """
+        The chemistry barcode triple consists of (BindingKit,
+        SequencingKit, SoftwareVersion) and is written on the
+        instrument to the bax file as of primary version 2.1.  Prior
+        to that, it was only written in the metadata.xml.
+
+        Returns None if the triple is not found in the file--in which
+        case the user should look in the metadata.xml.
+        """
+        try:
+            bindingKit      = self.file["/ScanData/RunInfo"].attrs["BindingKit"]
+            sequencingKit   = self.file["/ScanData/RunInfo"].attrs["SequencingKit"]
+            # version string in bas file looks like "2.1.1.1.x", we have to extract
+            # the "2.1.1"
+            tmp = self.file["/PulseData/BaseCalls"].attrs["ChangeListID"]
+            swVersion= ".".join(tmp.split(".")[0:2])
+            return (bindingKit, sequencingKit, swVersion)
+        except:
+            return None
+
+    @property
+    def sequencingChemistry(self):
+        return basH5Chemistry(self)
+
     def __len__(self):
         return len(self.sequencingZmws)
 
@@ -671,6 +698,14 @@ class BasH5Reader(object):
     @property
     def movieName(self):
         return self._parts[0].movieName
+
+    @property
+    def chemistryBarcodeTriple(self):
+        return self._parts[0].chemistryBarcodeTriple
+
+    @property
+    def sequencingChemistry(self):
+        return self._parts[0].sequencingChemistry
 
     def __len__(self):
         return len(self.sequencingZmws)
