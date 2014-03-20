@@ -111,7 +111,8 @@ class Gff3Record(object):
             return Gff3Record(_seqid, int(_start), int(_end), _type,
                               _score, _strand, _phase, _source, attributes)
         except (AssertionError, ValueError):
-            raise ValueError("Could not interpret string as a Gff3Record")
+            raise ValueError("Could not interpret string as a Gff3Record: %s" % s)
+
 
     @staticmethod
     def _formatField(field):
