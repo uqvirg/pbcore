@@ -29,8 +29,8 @@
 #################################################################################
 
 
-__all__ = ["basH5Chemistry",
-           "cmpH5Chemistries"]
+__all__ = ["tripleFromMetadataXML",
+           "decodeTriple"]
 
 import xml.etree.ElementTree as ET, os.path
 from pkg_resources import Requirement, resource_filename
@@ -66,8 +66,8 @@ def tripleFromMetadataXML(metadataXmlPath):
     Scrape the triple from the metadata.xml, or exception if the file
     or the relevant contents are not found
     """
-    nsd = {None: 'http://pacificbiosciences.com/PAP/Metadata.xsd',
-           "pb": 'http://pacificbiosciences.com/PAP/Metadata.xsd'}
+    nsd = {None: "http://pacificbiosciences.com/PAP/Metadata.xsd",
+           "pb": "http://pacificbiosciences.com/PAP/Metadata.xsd"}
     try:
         tree = ET.parse(metadataXmlPath)
         root = tree.getroot()
@@ -80,11 +80,7 @@ def tripleFromMetadataXML(metadataXmlPath):
         return (bindingKit, sequencingKit, instrumentControlVersion)
     except Exception as e:
         raise ChemistryLookupError, \
-            ("Could not find, or extract chemistry information from, %s" % metadataXmlPath)
-
-def triplesFromCmpH5MovieTable(cmph5reader):
-    pass
-
+            ("Could not find, or extract chemistry information from, %s" % (metadataXmlPath,))
 
 def decodeTriple(bindingKit, sequencingKit, softwareVersion):
     """
@@ -92,24 +88,3 @@ def decodeTriple(bindingKit, sequencingKit, softwareVersion):
     configuration triple that was recorded on the instrument.
     """
     return _BARCODE_MAPPINGS.get((bindingKit, sequencingKit, softwareVersion), "unknown")
-
-
-#
-# Main entry points
-#
-
-def basH5Chemistry(basH5Reader):
-    """
-    Look up the chemistry from a bax/bas .h5 file, possibly resorting
-    the metadata xml file
-    """
-    triple = basH5Reader.chemistryBarcodeTriple
-    if triple is None:
-        movieName = basH5Reader.movieName
-        _up = os.path.dirname(os.path.dirname(basH5Reader.filename))
-        metadataLocation = os.path.join(_up, movieName + ".metadata.xml")
-        triple = tripleFromMetadataXML(metadataLocation)
-    return decodeTriple(*triple)
-
-def cmpH5Chemistries(cmpH5Reader):
-    pass

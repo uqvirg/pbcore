@@ -41,7 +41,7 @@ from itertools import groupby
 from collections import OrderedDict
 
 from pbcore.io.FofnIO import readFofn
-from pbcore.chemistry import basH5Chemistry
+from pbcore.chemistry import decodeTriple, tripleFromMetadataXML
 from ._utils import arrayFromDataset, CommonEqualityMixin
 
 
@@ -476,8 +476,9 @@ class BaxH5Reader(object):
         instrument to the bax file as of primary version 2.1.  Prior
         to that, it was only written in the metadata.xml.
 
-        Returns None if the triple is not found in the file--in which
-        case the user should look in the metadata.xml.
+        If the triple is not found in the bas file, we look in the
+        metadata.xml---throwing an exception if the xml file is not
+        found or can't be parsed.
         """
         try:
             bindingKit      = self.file["/ScanData/RunInfo"].attrs["BindingKit"]
@@ -488,11 +489,15 @@ class BaxH5Reader(object):
             swVersion= ".".join(tmp.split(".")[0:2])
             return (bindingKit, sequencingKit, swVersion)
         except:
-            return None
+            movieName = self.movieName
+            _up = op.dirname(op.dirname(self.filename))
+            metadataLocation = op.join(_up, movieName + ".metadata.xml")
+            triple = tripleFromMetadataXML(metadataLocation)
+            return triple
 
     @property
     def sequencingChemistry(self):
-        return basH5Chemistry(self)
+        return decodeTriple(*self.chemistryBarcodeTriple)
 
     def __len__(self):
         return len(self.sequencingZmws)
