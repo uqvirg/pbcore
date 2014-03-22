@@ -742,8 +742,12 @@ class CmpH5Reader(object):
             self.filename = filenameOrH5File.filename
             self.file = filenameOrH5File
         else:
-            self.filename = abspath(expanduser(filenameOrH5File))
-            self.file = h5py.File(self.filename, "r")
+            try:
+                self.filename = abspath(expanduser(filenameOrH5File))
+                self.file = h5py.File(self.filename, "r")
+            except IOError:
+                raise IOError, ("Invalid or nonexistent cmp.h5 file %s" % filenameOrH5File)
+
         rawAlignmentIndex = self.file["/AlnInfo/AlnIndex"].value
         self._alignmentIndex = rawAlignmentIndex.view(dtype = ALIGNMENT_INDEX_DTYPE) \
                                                 .view(np.recarray)                   \

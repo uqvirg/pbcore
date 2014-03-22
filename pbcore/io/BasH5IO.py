@@ -329,8 +329,12 @@ class BaxH5Reader(object):
     single-part bas.h5 files.
     """
     def __init__(self, filename):
-        self.filename = op.abspath(op.expanduser(filename))
-        self.file = h5py.File(self.filename, "r")
+        try:
+            self.filename = op.abspath(op.expanduser(filename))
+            self.file = h5py.File(self.filename, "r")
+        except IOError:
+            raise IOError, ("Invalid or nonexistent bax/bas file %s" % filename)
+
         #
         # Raw base calls?
         #
@@ -601,8 +605,13 @@ class BasH5Reader(object):
 
         if len(args) == 1:
             filename = args[0]
-            self.filename = op.abspath(op.expanduser(filename))
-            self.file = h5py.File(self.filename, "r")
+            try:
+                self.filename = op.abspath(op.expanduser(filename))
+                self.file = h5py.File(self.filename, "r")
+            except IOError:
+                raise IOError, ("Invalid or nonexistent bas/bax file %s" % filename)
+
+
             # Is this a multi-part or single-part?
             if self.file.get("MultiPart"):
                 directory = op.dirname(self.filename)
