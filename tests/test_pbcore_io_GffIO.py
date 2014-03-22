@@ -56,13 +56,20 @@ class TestGffReader:
         self.reader = GffReader(data.getGff3())
 
     def test_headers(self):
-        assert_equal(['##gff-version   3',
-                      '##sequence-region   ctg123 1 1497228'],
+        assert_equal(["##gff-version 3",
+                      "##pacbio-variant-version 2.1",
+                      "##date Sat Mar 22 12:16:13 2014",
+                      "##feature-ontology http://song.cvs.sourceforge.net/*checkout*/song/ontology/sofa.obo?revision=1.12",
+                      "##source GenomicConsensus 0.8.0",
+                      "##source-commandline /Users/dalexander/.virtualenvs/VE/bin/variantCaller.py --algorithm=plurality -q20 -x5 pbcore/data/aligned_reads_1.cmp.h5 -r /Users/dalexander/Data/lambdaNEB.fa -o /tmp/v.gff",
+                      "##source-alignment-file /Users/dalexander/Dropbox/Sources/git/pbcore/pbcore/data/aligned_reads_1.cmp.h5",
+                      "##source-reference-file /Users/dalexander/Data/lambdaNEB.fa",
+                      "##sequence-region lambda_NEB3011 1 48502"],
                      self.reader.headers)
 
     def test__iter__(self):
         records = list(self.reader)
-        rawLines = self.rawFile.readlines()[2:]
+        rawLines = self.rawFile.readlines()[9:]
         for record, rawLine in zip(records, rawLines):
             # No newlines or whitespace allowed in records
             assert_equal(str(record).strip(), str(record))

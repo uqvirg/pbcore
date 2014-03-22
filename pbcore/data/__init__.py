@@ -87,7 +87,7 @@ def getGff3():
     '''
     Returns the filename of an example GFFv3 file
     '''
-    return _getAbsPath("gff_example1.gff3")
+    return _getAbsPath("variants.gff")
 
 def getFasta():
     '''
