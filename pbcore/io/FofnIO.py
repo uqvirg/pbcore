@@ -32,8 +32,12 @@
 
 from pbcore.io.base import getFileHandle
 from os.path import dirname, isabs, join, normpath, abspath
+import xml.etree.ElementTree as ET
 
-__all__ = [ "readFofn" ]
+
+__all__ = [ "readFofn",
+            "readInputXML",
+            "enumeratePulseFiles" ]
 
 def readFofn(f):
     """
@@ -57,3 +61,30 @@ def readFofn(f):
             yield normpath(join(fofnRoot, path))
         else:
             raise IOError, "Cannot handle relative paths in StringIO FOFN"
+
+def readInputXML(fname):
+    tree = ET.parse(fname)
+    root = tree.getroot()
+    for elt in root.iter():
+        if elt.tag=="location":
+            yield elt.text
+
+def enumeratePulseFiles(fname):
+    """
+    A pulse file is a file with suffix .bax.h5, .plx.h5, or bas.h5
+
+    fname is either a name of a pulse file, a FOFN (file of file
+    names) listing pulse files, or an input.xml file.
+
+    This is a generalization of readFofn for the case where fname is
+    of type fofn|pulse, provided for convenience for tools that accept
+    such an argument.
+    """
+    if fname.endswith(".fofn"):
+        for pls in readFofn(fname):
+            yield pls
+    elif fname.endswith(".xml"):
+        for pls in readInputXML(fname):
+            yield pls
+    else:
+        yield fname
