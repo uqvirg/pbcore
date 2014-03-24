@@ -875,7 +875,7 @@ class CmpH5Reader(object):
                 # Old way
                 self._sequencingChemistry = mi["SequencingChemistry"].value
             else:
-                raise ChemistryLookupError, "Chemistry information could not be found!"
+                raise ChemistryLookupError, "Chemistry information could not be found in cmp.h5!"
         return self._sequencingChemistry
 
     def attach(self, fofnFilename):
