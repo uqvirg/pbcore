@@ -30,7 +30,8 @@
 
 
 __all__ = ["tripleFromMetadataXML",
-           "decodeTriple"]
+           "decodeTriple",
+           "ChemistryLookupError" ]
 
 import xml.etree.ElementTree as ET, os.path
 from pkg_resources import Requirement, resource_filename

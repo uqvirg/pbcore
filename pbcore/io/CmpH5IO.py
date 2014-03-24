@@ -40,6 +40,7 @@ from os.path import abspath, expanduser
 from pbcore.io.rangeQueries import makeReadLocator
 from pbcore.io._utils import rec_join, arrayFromDataset
 from pbcore.io.BasH5IO import BasH5Collection
+from pbcore.chemistry import decodeTriple, ChemistryLookupError
 
 # ========================================
 #  Data manipulation routines.
@@ -470,7 +471,7 @@ class CmpH5Alignment(object):
 
     @property
     def sequencingChemistry(self):
-        return self.movieInfo.SequencingChemistry
+        return self.cmpH5.sequencingChemistry[self.MovieID-1]
 
     def alignmentArray(self, orientation="native"):
         """
@@ -772,23 +773,15 @@ class CmpH5Reader(object):
             frameRate = [np.nan] * numMovies
             timeScale = [1.0] * numMovies
 
-        if "SequencingChemistry" in self.file["/MovieInfo"]:
-            sequencingChemistry = self.file["/MovieInfo/SequencingChemistry"].value
-        else:
-            sequencingChemistry = ["unknown"] * numMovies
-
-
         self._movieInfoTable = np.rec.fromrecords(
             zip(self.file["/MovieInfo/ID"],
                 self.file["/MovieInfo/Name"],
                 frameRate,
-                timeScale,
-                sequencingChemistry),
+                timeScale),
             dtype=[("ID"                  , int),
                    ("Name"                , object),
                    ("FrameRate"           , float),
-                   ("TimeScale"           , float),
-                   ("SequencingChemistry" , object)])
+                   ("TimeScale"           , float)])
 
         self._movieDict = {}
         for record in self._movieInfoTable:
@@ -862,6 +855,28 @@ class CmpH5Reader(object):
             self.zScore = self.file["/AlnInfo/ZScore"].value
 
         self.basH5Collection = None
+        self._sequencingChemistry = None
+
+    @property
+    def sequencingChemistry(self):
+        if self._sequencingChemistry is None:
+            mi = self.file["/MovieInfo"]
+            if (("BindingKit" in mi) and
+                ("SequencingKit" in mi) and
+                ("SoftwareVersion" in mi)):
+                # New way
+                self._sequencingChemistry = \
+                    [ decodeTriple(bk, sk, sv)
+                      for (bk, sk, sv) in zip(
+                              mi["BindingKit"],
+                              mi["SequencingKit"],
+                              mi["SoftwareVersion"]) ]
+            elif "SequencingChemistry" in mi:
+                # Old way
+                self._sequencingChemistry = mi["SequencingChemistry"].value
+            else:
+                raise ChemistryLookupError, "Chemistry information could not be found!"
+        return self._sequencingChemistry
 
     def attach(self, fofnFilename):
         """
