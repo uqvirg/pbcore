@@ -749,6 +749,8 @@ class CmpH5Reader(object):
             except IOError:
                 raise IOError, ("Invalid or nonexistent cmp.h5 file %s" % filenameOrH5File)
 
+        if len(self.file["/AlnInfo/AlnIndex"]) == 0:
+            raise ValueError, "Empty cmp.h5 file, cannot be read by CmpH5Reader"
         rawAlignmentIndex = self.file["/AlnInfo/AlnIndex"].value
         self._alignmentIndex = rawAlignmentIndex.view(dtype = ALIGNMENT_INDEX_DTYPE) \
                                                 .view(np.recarray)                   \
@@ -1067,7 +1069,7 @@ class CmpH5Reader(object):
 
     @property
     def isEmpty(self):
-        return len(self.file["/AlnInfo"]) == 0
+        return len(self.file["/AlnInfo/AlnIndex"]) == 0
 
     def alignmentGroup(self, alnGroupId):
         return self._alignmentGroupById[alnGroupId]
