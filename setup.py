@@ -19,6 +19,7 @@ setup(
     package_dir = {'':'.'},
     package_data = {'pbcore': ['data/*.h5', 'data/*.gff', 'data/*.fasta',
                                'data/*.fasta.fai', 'data/*.fofn', 'data/*.m4',
+                               'data/*.fa', 'data/*.fa.fai',
                                'data/*.m5', 'data/*.bam', 'data/*.bam.bai',
                                'chemistry/resources/*.xml']
                                },
