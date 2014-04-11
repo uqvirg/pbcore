@@ -102,6 +102,12 @@ def getTinyFasta():
     """
     return _getAbsPath('Fluidigm_human_amplicons_tiny.fasta')
 
+def getLambdaFasta():
+    """
+    Returns the filename of the FASTA of the lambda phage reference.
+    """
+    return _getAbsPath('lambdaNEB.fa')
+
 def getDosFormattedFasta():
     """
     Returns the filename of an example FASTA file with DOS line endings
