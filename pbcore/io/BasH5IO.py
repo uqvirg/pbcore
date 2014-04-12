@@ -338,7 +338,7 @@ class BaxH5Reader(object):
         #
         # Raw base calls?
         #
-        if "BaseCalls" in self.file["/PulseData"]:
+        if "/PulseData/BaseCalls/Basecall" in self.file:
             self._basecallsGroup = self.file["/PulseData/BaseCalls"]
             self._offsetsByHole  = _makeOffsetsDataStructure(self._basecallsGroup)
             self.hasRawBasecalls = True
@@ -347,7 +347,7 @@ class BaxH5Reader(object):
         #
         # CCS base calls?
         #
-        if "ConsensusBaseCalls" in self.file["/PulseData"].keys():
+        if "/PulseData/ConsensusBaseCalls" in self.file:
             self._ccsBasecallsGroup = self.file["/PulseData/ConsensusBaseCalls"]
             self._ccsOffsetsByHole  = _makeOffsetsDataStructure(self._ccsBasecallsGroup)
             self._ccsNumPasses      = self._ccsBasecallsGroup["Passes/NumPasses"]
