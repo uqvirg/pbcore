@@ -328,7 +328,7 @@ class BaxH5Reader(object):
     The `BaxH5Reader` class provides access to bax.h5 file and
     single-part bas.h5 files.
     """
-    def __init__(self, filename):
+    def __init__(self, filename, regionH5Filename=None):
         try:
             self.filename = op.abspath(op.expanduser(filename))
             self.file = h5py.File(self.filename, "r")
@@ -358,6 +358,24 @@ class BaxH5Reader(object):
         self._mainBasecallsGroup = self._basecallsGroup if self.hasRawBasecalls \
                                    else self._ccsBasecallsGroup
 
+        if regionH5Filename is None:
+            # load region information from the bas/bax file
+            self._loadRegions(self.file)        
+        else:
+            # load region information from a separate region file
+            self.loadExternalRegions(regionH5Filename)
+
+        #
+        # ZMW metric cache -- probably want to move prod and readScore
+        # here.
+        #
+        self.__metricCache = {}
+
+    def _loadRegions(self, fh):
+        """
+        Loads region table information from the given file handle and applies 
+        it to the ZMW data.
+        """
         holeNumbers = self._mainBasecallsGroup["ZMW/HoleNumber"].value
         self._holeNumberToIndex = dict(zip(holeNumbers, range(len(holeNumbers))))
 
@@ -365,7 +383,8 @@ class BaxH5Reader(object):
         # Region table
         #
         self.regionTable = toRecArray(REGION_TABLE_DTYPE,
-                                      self.file["/PulseData/Regions"].value)
+                                      fh["/PulseData/Regions"].value)
+
         self._regionTableIndex = _makeRegionTableIndex(self.regionTable.holeNumber)
         isHqRegion     = self.regionTable.regionType == HQ_REGION
         hqRegions      = self.regionTable[isHqRegion]
@@ -400,11 +419,28 @@ class BaxH5Reader(object):
                         (hqRegionLength >  0)]
 
         self._allSequencingZmws = holeNumbers[holeStatus == SEQUENCING_ZMW]
-        #
-        # ZMW metric cache -- probably want to move prod and readScore
-        # here.
-        #
-        self.__metricCache = {}
+
+    def loadExternalRegions(self, regionH5Filename):
+        """
+        Loads regions defined in the given file, overriding those found in the
+        bas/bax file.
+        """
+        try:
+            fh = h5py.File(op.abspath(op.expanduser(regionH5Filename)), "r")
+        except IOError:
+            raise IOError, ("Invalid or nonexistent file %s" % regionH5Filename)
+
+        self._loadRegions(fh)
+        fh.close()
+        
+        # A sanity check that the given region table provides information for
+        # hole numbers contain in this base file.
+        baxHoleNumbers = self._mainBasecallsGroup["ZMW/HoleNumber"].value
+        rgnHoleNumbers = self.regionTable.holeNumber
+        if not np.in1d(rgnHoleNumbers, baxHoleNumbers).all():
+            msg = "Region file (%s) does not contain the same hole numbers as " \
+                  "bas/bax file (%s)"
+            raise IOError, (msg % (regionH5Filename, self.filename))
 
     @property
     def sequencingZmws(self):
