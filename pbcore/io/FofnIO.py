@@ -31,7 +31,7 @@
 # Authors: David Alexander
 
 from pbcore.io.base import getFileHandle
-from os.path import dirname, isabs, join, normpath, abspath
+from os.path import dirname, isabs, join, abspath, expanduser
 import xml.etree.ElementTree as ET
 
 
@@ -49,7 +49,7 @@ def readFofn(f):
     be reckoned from the directory containing the FOFN.
     """
     if isinstance(f, basestring):
-        fofnRoot = dirname(abspath(f))
+        fofnRoot = dirname(abspath(expanduser(f)))
     else:
         fofnRoot = None
 
@@ -58,7 +58,7 @@ def readFofn(f):
         if isabs(path):
             yield path
         elif fofnRoot is not None:
-            yield normpath(join(fofnRoot, path))
+            yield join(fofnRoot, path)
         else:
             raise IOError, "Cannot handle relative paths in StringIO FOFN"
 
