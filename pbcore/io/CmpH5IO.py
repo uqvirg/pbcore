@@ -112,6 +112,12 @@ _exoneratePlusTranscriptTable = \
                   " |||||Z"
                   "ZZZZZZZ", dtype=np.uint8).reshape(7, 7)
 
+class EmptyCmpH5Error(Exception):
+    """An exception raised when CmpH5Reader tries to read from a
+    cmp.h5 with no alignments.
+    """
+    pass
+
 def readFromAlignmentArray(a, gapped=True, complement=False):
     """
     Decode the read component of an alignment array.
@@ -750,7 +756,7 @@ class CmpH5Reader(object):
                 raise IOError, ("Invalid or nonexistent cmp.h5 file %s" % filenameOrH5File)
 
         if len(self.file["/AlnInfo/AlnIndex"]) == 0:
-            raise ValueError, "Empty cmp.h5 file, cannot be read by CmpH5Reader"
+            raise EmptyCmpH5Error("Empty cmp.h5 file, cannot be read by CmpH5Reader")
         rawAlignmentIndex = self.file["/AlnInfo/AlnIndex"].value
         self._alignmentIndex = rawAlignmentIndex.view(dtype = ALIGNMENT_INDEX_DTYPE) \
                                                 .view(np.recarray)                   \
