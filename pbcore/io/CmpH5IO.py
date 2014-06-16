@@ -379,6 +379,9 @@ class CmpH5Alignment(object):
         """
         return self.alignedLength - self.nDel
 
+    def __len__(self):
+        return self.readLength
+
     @property
     def alignedLength(self):
         """
