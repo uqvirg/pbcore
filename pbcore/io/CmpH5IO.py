@@ -1164,6 +1164,8 @@ class CmpH5Reader(object):
         zmwName must follow the PacBio naming convention:
           <movieName>/<holeNumber>
 
+        Alignments returned are sorted by readStart
+
         (Not optimized)
         """
         fields = zmwName.split("/")
@@ -1172,7 +1174,8 @@ class CmpH5Reader(object):
         movieId = self.movieInfo(movieName).ID
         rns = np.flatnonzero((self.MovieID == movieId) &
                              (self.HoleNumber == holeNumber))
-        return self[rns]
+        alns = self[rns]
+        return sorted(alns, key=lambda a: a.readStart)
 
     def hasPulseFeature(self, featureName):
         """
