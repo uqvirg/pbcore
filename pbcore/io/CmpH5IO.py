@@ -798,6 +798,7 @@ class CmpH5Reader(object):
         for record in self._movieInfoTable:
             assert record.ID not in self._movieDict
             self._movieDict[record.ID] = record
+            self._movieDict[record.Name] = record
 
         _referenceGroupTbl = np.rec.fromrecords(
             zip(self.file["/RefGroup/ID"],
@@ -1156,6 +1157,22 @@ class CmpH5Reader(object):
             return rowNumbers
         else:
             return self[rowNumbers]
+
+
+    def readsForZmw(self, zmwName):
+        """
+        zmwName must follow the PacBio naming convention:
+          <movieName>/<holeNumber>
+
+        (Not optimized)
+        """
+        fields = zmwName.split("/")
+        movieName = fields[0]
+        holeNumber = int(fields[1])
+        movieId = self.movieInfo(movieName).ID
+        rns = np.flatnonzero((self.MovieID == movieId) &
+                             (self.HoleNumber == holeNumber))
+        return self[rns]
 
     def hasPulseFeature(self, featureName):
         """
