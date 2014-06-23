@@ -304,10 +304,12 @@ class CmpH5Alignment(object):
         Return the name of the read that was aligned, in standard
         PacBio format.
         """
-        return "%s/%d/%d_%d" % (self.movieInfo.Name,
-                                self.HoleNumber,
-                                self.rStart,
-                                self.rEnd)
+        zmwName = "%s/%d" % (self.movieInfo.Name, self.HoleNumber)
+        if self.cmpH5.readType == "CCS":
+            return "%s/ccs" % (zmwName,)
+        else:
+            return "%s/%d_%d" % (zmwName, self.rStart, self.rEnd)
+
     @property
     def movieInfo(self):
         """

@@ -38,6 +38,10 @@ class TestCmpH5Reader:
         assert self.hit1.isForwardStrand
         assert not self.hit1.isReverseStrand
 
+    def test_readName(self):
+        EQ("m110818_075520_42141_c100129202555500000315043109121112_s2_p0/3008/3_304", self.hit0.readName)
+        EQ("m110818_075520_42141_c100129202555500000315043109121112_s2_p0/3008/353_757", self.hit1.readName)
+
     def test_read(self):
         EQ("GGGCG-CGGACCTCCGCGG-",
            self.hit0.read(orientation="genomic")[:20])
