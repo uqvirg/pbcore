@@ -155,6 +155,14 @@ class Zmw(CommonEqualityMixin):
         return self.zmwMetric("Productivity")
 
 
+    @property
+    def hqRegionSnr(self):
+        """
+        Return the SNRs, as a vector by channel.
+        """
+        return self.zmwMetric("HQRegionSNR")
+
+
     def zmwMetric(self, name):
         """
         Return the value of metric 'name' from the ZMW metrics.
