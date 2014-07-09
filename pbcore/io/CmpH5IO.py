@@ -30,7 +30,8 @@
 
 # Author: David Alexander
 __all__ = [ "CmpH5Reader",
-            "CmpH5Alignment" ]
+            "CmpH5Alignment",
+            "EmptyCmpH5Error" ]
 
 import h5py, numpy as np
 from bisect import bisect_left, bisect_right
