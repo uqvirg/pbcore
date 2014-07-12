@@ -99,8 +99,15 @@ class Zmw(CommonEqualityMixin):
 
     @property
     def regionTable(self):
-        startRow, endRow = self.baxH5._regionTableIndex[self.holeNumber]
-        return self.baxH5.regionTable[startRow:endRow]
+        if self.holeNumber in self.baxH5._regionTableIndex:
+            startRow, endRow = self.baxH5._regionTableIndex[self.holeNumber]
+            return self.baxH5.regionTable[startRow:endRow]
+        else:
+            # Broken region table---primary pipeline bug (see bugs
+            # 23585, 25273).  Work around this by returning a fake
+            # regiontable consisting of an empty HQ region
+            return toRecArray(REGION_TABLE_DTYPE,
+                              [ (self.holeNumber, HQ_REGION, 0, 0, 0) ])
 
     #
     # The following calls return one or more intervals ( (int, int) ).
@@ -129,12 +136,9 @@ class Zmw(CommonEqualityMixin):
     def hqRegion(self):
         rt = self.regionTable
         hqRows = rt[rt.regionType == HQ_REGION]
-        if len(hqRows) == 1:
-            hqRow = hqRows[0]
-            return hqRow.regionStart, hqRow.regionEnd
-        else:
-            # Broken region table, bug 23585
-            return 0, 0
+        assert len(hqRows) == 1
+        hqRow = hqRows[0]
+        return hqRow.regionStart, hqRow.regionEnd
 
     @property
     def readScore(self):
