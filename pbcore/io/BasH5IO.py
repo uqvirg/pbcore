@@ -453,7 +453,8 @@ class BaxH5Reader(object):
     @property
     def sequencingZmws(self):
         """
-        A list of the hole numbers that produced useable sequence data
+        A list of the hole numbers that produced useable sequence data.
+        Specifically, this means ZMWs that have an HQ region.
         """
         return self._sequencingZmws
 
