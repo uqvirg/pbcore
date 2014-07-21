@@ -73,14 +73,18 @@ def enumeratePulseFiles(fname):
     """
     A pulse file is a file with suffix .bax.h5, .plx.h5, or bas.h5
 
-    fname is either a name of a pulse file, a FOFN (file of file
-    names) listing pulse files, or an input.xml file.
+    fname is either a name of a pulse file, a list of names of pulse
+    files, a FOFN (file of file names) listing pulse files, or an
+    input.xml file.
 
     This is a generalization of readFofn for the case where fname is
     of type fofn|pulse, provided for convenience for tools that accept
     such an argument.
     """
-    if fname.endswith(".fofn"):
+    if isinstance(fname, list):
+        for fname_ in fname:
+            yield fname_
+    elif fname.endswith(".fofn"):
         for pls in readFofn(fname):
             yield pls
     elif fname.endswith(".xml"):
